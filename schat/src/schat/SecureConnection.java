@@ -85,6 +85,7 @@ public class SecureConnection implements EventListener<Object> {
 				secretKey = skf.generateSecret(desSpec);
 
 				peer.log("Exchanged a "+desSpec.getKey().length+"B key");
+				peer.log("Secure channel active");
 			}
 			catch (Exception e) {
 				System.err.println("Unable to initialize security, connection aborted");
@@ -103,13 +104,18 @@ public class SecureConnection implements EventListener<Object> {
 
 				byte plaintext[] = c.doFinal((byte[])obj);
 				String message = new String(plaintext);
-				System.out.println("Received encrypted: " + message + " (was: "+new String((byte[])obj)+")");
+				System.out.println("Received encrypted: " + message);
 			}
 			catch (Exception e) { e.printStackTrace(); }
 		}
 	}
 
 	public void send(String s) {
+		if (secretKey == null || !client.isAlive()) {
+			System.err.println("no active connection");
+			return;
+		}
+
 		try {
 			Cipher c = Cipher.getInstance("DES/ECB/PKCS5Padding");
 			c.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -120,4 +126,7 @@ public class SecureConnection implements EventListener<Object> {
 		catch (Exception e) { e.printStackTrace(); }
 	}
 
+	public void close() {
+		client.abort();
+	}
 }

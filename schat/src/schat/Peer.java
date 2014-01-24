@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import schat.events.EventListener;
+import schat.events.EventSource;
 import schat.tcp.Client;
 import schat.tcp.Server;
 
@@ -13,6 +14,11 @@ public class Peer implements EventListener<Client> {
 	protected Client currentClient;
 	protected Server server;
 	protected int port;
+	
+	private EventSource<SecureConnection> connectionEvent = new EventSource<SecureConnection>();
+	public EventSource<SecureConnection> getConnectionEvent() {
+		return connectionEvent;
+	}
 
 	protected SecureConnection currentConnection;
 	public SecureConnection getCurrentConnection() {
@@ -52,6 +58,7 @@ public class Peer implements EventListener<Client> {
 			currentClient = newClient;
 			currentConnection = new SecureConnection(newClient, this);
 			log("new connection established!");
+			connectionEvent.fire(currentConnection);
 		}
 	}
 

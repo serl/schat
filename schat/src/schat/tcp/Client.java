@@ -7,7 +7,7 @@ import schat.events.EventSource;
 
 public class Client extends Thread {
 	private static final int BUFFER_SIZE = 10;
-	
+
 	protected Socket socket;
 	protected ObjectInputStream inSock;
 	protected ObjectOutputStream outSock;
@@ -16,7 +16,7 @@ public class Client extends Thread {
 	public EventSource<Object> getDataEvent() {
 		return dataEvent;
 	}
-	
+
 	protected boolean initiator;
 	public boolean isInitiator() {
 		return initiator;
@@ -29,8 +29,8 @@ public class Client extends Thread {
 				dataEvent.fire(obj);
 			}
 			catch (EOFException e) {
-				try { socket.close(); }
-				catch (IOException e1) { }
+				abort();
+				System.err.println("Client socket closed: " + socket);
 			}
 			catch (Exception e) { }
 		}
