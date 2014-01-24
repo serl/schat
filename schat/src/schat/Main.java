@@ -15,20 +15,21 @@ public class Main {
 		catch (InterruptedException e) { }
 
 		peer_two.connectToClient(InetAddress.getLocalHost(), 54200);
-
+		/*
 		try { Thread.sleep(1000); }
 		catch (InterruptedException e) { }
-		
+
 		SecureConnection two_to_one = peer_two.getCurrentConnection();
-		SecureConnection one_to_two = peer_two.getCurrentConnection();
-		
+		SecureConnection one_to_two = peer_one.getCurrentConnection();
+
 		two_to_one.send("test two_to_one");
 		one_to_two.send("test one_to_two");
-		
+
 		try { Thread.sleep(2000); }
 		catch (InterruptedException e) { }
-		
-		peer_one.abort();
-		peer_two.abort();
+		 */
+
+		//peer_one.abort();
+		//peer_two.abort();
 	}
 }

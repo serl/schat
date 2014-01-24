@@ -9,20 +9,24 @@ public class Client extends Thread {
 	private static final int BUFFER_SIZE = 10;
 	
 	protected Socket socket;
-	protected DataInputStream inSock;
-	protected DataOutputStream outSock;
+	protected ObjectInputStream inSock;
+	protected ObjectOutputStream outSock;
 
-	private EventSource<String> writerEvent = new EventSource<String>(BUFFER_SIZE);
-	public EventSource<String> getWriterEvent() {
-		return writerEvent;
+	private EventSource<Object> dataEvent = new EventSource<Object>(BUFFER_SIZE);
+	public EventSource<Object> getDataEvent() {
+		return dataEvent;
+	}
+	
+	protected boolean initiator;
+	public boolean isInitiator() {
+		return initiator;
 	}
 
 	public void run() {
 		while (socket.isConnected() && !socket.isClosed()) {
 			try {
-				String in = inSock.readUTF();
-				System.err.println("received: \""+in+"\" from "+socket);
-				writerEvent.fire(in);
+				Object obj = inSock.readObject();
+				dataEvent.fire(obj);
 			}
 			catch (EOFException e) {
 				try { socket.close(); }
@@ -34,6 +38,7 @@ public class Client extends Thread {
 
 	public void setSocket(Socket socket) throws IOException {
 		this.socket = socket;
+		this.initiator = false;
 		createStreams();
 	}
 
@@ -48,6 +53,7 @@ public class Client extends Thread {
 			throw e;
 		}
 		createStreams();
+		this.initiator = true;
 	}
 
 	public void abort() {
@@ -59,8 +65,8 @@ public class Client extends Thread {
 
 	private void createStreams() throws IOException {
 		try {
-			inSock = new DataInputStream(socket.getInputStream());
-			outSock = new DataOutputStream(socket.getOutputStream());
+			outSock = new ObjectOutputStream(socket.getOutputStream());
+			inSock = new ObjectInputStream(socket.getInputStream());
 		}
 		catch (IOException e) {
 			System.err.println("Unable to create streams on socket");
@@ -69,7 +75,7 @@ public class Client extends Thread {
 		this.start();
 	}
 
-	public void send(String s) throws IOException {
-		outSock.writeUTF(s);
+	public void send(Object obj) throws IOException {
+		outSock.writeObject(obj);
 	}
 }

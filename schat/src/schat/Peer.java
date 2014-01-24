@@ -50,7 +50,7 @@ public class Peer implements EventListener<Client> {
 		}
 		else {
 			currentClient = newClient;
-			currentConnection = new SecureConnection(newClient);
+			currentConnection = new SecureConnection(newClient, this);
 			log("new connection established!");
 		}
 	}
@@ -61,7 +61,7 @@ public class Peer implements EventListener<Client> {
 		manageConnection(arg);
 	}
 
-	protected void log(String s)
+	public void log(String s)
 	{
 		System.out.println("PEER#"+port+": "+s);
 	}
