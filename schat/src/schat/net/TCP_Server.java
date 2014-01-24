@@ -2,14 +2,14 @@ package schat.net;
 
 import java.net.*;
 
-import schat.events.ConnectionCreator;
+import schat.events.EventSource;
 
 class TCP_Server extends Thread {
 	private final int port;
 	private ServerSocket serverSocket;
 	
-	private ConnectionCreator connectionEvent = new ConnectionCreator();
-	public ConnectionCreator getConnectionEvent() {
+	private EventSource<TCP_Client> connectionEvent = new EventSource<TCP_Client>();
+	public EventSource<TCP_Client> getConnectionEvent() {
 		return connectionEvent;
 	}
 
@@ -47,7 +47,7 @@ class TCP_Server extends Thread {
 				try {
 					TCP_Client c = new TCP_Client();
 					c.setSocket(clientSocket);
-					connectionEvent.throwConnection(c);
+					connectionEvent.fire(c);
 				}
 				catch (Exception e) {
 					System.err.println("Server: issues on thread: " + e.getMessage());

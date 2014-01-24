@@ -3,15 +3,15 @@ package schat.net;
 import java.net.*;
 import java.io.*;
 
-import schat.events.*;
+import schat.events.EventSource;
 
 public class TCP_Client extends Thread {
 	private Socket socket;
 	private DataInputStream inSock;
 	private DataOutputStream outSock;
 
-	private ByteWriter writerEvent = new ByteWriter();
-	public ByteWriter getWriterEvent() {
+	private EventSource<String> writerEvent = new EventSource<String>();
+	public EventSource<String> getWriterEvent() {
 		return writerEvent;
 	}
 
@@ -20,7 +20,7 @@ public class TCP_Client extends Thread {
 			try {
 				String in = inSock.readUTF();
 				System.err.println("received: \""+in+"\" from "+socket);
-				writerEvent.throwBytes(in);
+				writerEvent.fire(in);
 			}
 			catch (EOFException e) {
 				try { socket.close(); }
