@@ -4,11 +4,14 @@ import java.net.*;
 
 import schat.events.EventSource;
 
-class Server extends Thread {
+public class Server extends Thread {
+	private static final int BUFFER_SIZE = 10;
+
 	private final int port;
 	private ServerSocket serverSocket;
+	private boolean aborted = false;
 	
-	private EventSource<Client> connectionEvent = new EventSource<Client>();
+	private EventSource<Client> connectionEvent = new EventSource<Client>(BUFFER_SIZE);
 	public EventSource<Client> getConnectionEvent() {
 		return connectionEvent;
 	}
@@ -16,11 +19,16 @@ class Server extends Thread {
 	public Server(int port) {
 		this.port = port;
 	}
+	
+	public void abort() {
+		aborted = true;
+	}
 
 	public void run() {
 		try {
 			serverSocket = new ServerSocket(port);
 			serverSocket.setReuseAddress(true);
+			serverSocket.setSoTimeout(5000);
 			System.err.println("Server socket created: " + serverSocket);
 		}
 		catch (Exception e) {
@@ -30,13 +38,16 @@ class Server extends Thread {
 		}
 
 		try {
-			while (true) {
-				System.err.println("Server: waiting for clients...\n");
+			while (!aborted) {
+				///System.err.println("Server: waiting for clients...");
 
 				Socket clientSocket;
 				try {
 					clientSocket = serverSocket.accept();
 					System.err.println("Server: connection accepted: " + clientSocket);
+				}
+				catch (SocketTimeoutException e) {
+					continue;
 				}
 				catch (Exception e) {
 					System.err.println("Server: error accepting connection: " + e.getMessage());

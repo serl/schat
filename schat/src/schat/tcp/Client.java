@@ -6,11 +6,13 @@ import java.io.*;
 import schat.events.EventSource;
 
 public class Client extends Thread {
-	private Socket socket;
-	private DataInputStream inSock;
-	private DataOutputStream outSock;
+	private static final int BUFFER_SIZE = 10;
+	
+	protected Socket socket;
+	protected DataInputStream inSock;
+	protected DataOutputStream outSock;
 
-	private EventSource<String> writerEvent = new EventSource<String>();
+	private EventSource<String> writerEvent = new EventSource<String>(BUFFER_SIZE);
 	public EventSource<String> getWriterEvent() {
 		return writerEvent;
 	}
@@ -26,16 +28,13 @@ public class Client extends Thread {
 				try { socket.close(); }
 				catch (IOException e1) { }
 			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			catch (Exception e) { }
 		}
 	}
 
 	public void setSocket(Socket socket) throws IOException {
 		this.socket = socket;
 		createStreams();
-		this.start();
 	}
 
 	public void connect(InetAddress addr, int port) throws IOException {
@@ -49,7 +48,6 @@ public class Client extends Thread {
 			throw e;
 		}
 		createStreams();
-		this.start();
 	}
 
 	public void abort() {
@@ -65,9 +63,10 @@ public class Client extends Thread {
 			outSock = new DataOutputStream(socket.getOutputStream());
 		}
 		catch (IOException e) {
-			System.err.println("Unable to create streams on client socket");
+			System.err.println("Unable to create streams on socket");
 			throw e;
 		}
+		this.start();
 	}
 
 	public void send(String s) throws IOException {
