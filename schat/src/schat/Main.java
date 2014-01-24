@@ -15,7 +15,7 @@ public class Main {
 		catch (InterruptedException e) { }
 
 		peer_two.connectToClient(InetAddress.getLocalHost(), 54200);
-		/*
+
 		try { Thread.sleep(1000); }
 		catch (InterruptedException e) { }
 
@@ -24,7 +24,8 @@ public class Main {
 
 		two_to_one.send("test two_to_one");
 		one_to_two.send("test one_to_two");
-
+		
+		/*
 		try { Thread.sleep(2000); }
 		catch (InterruptedException e) { }
 		 */

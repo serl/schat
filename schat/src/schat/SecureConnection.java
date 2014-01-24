@@ -1,13 +1,16 @@
 package schat;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.DHParameterSpec;
 
 import schat.events.EventListener;
@@ -20,7 +23,7 @@ public class SecureConnection implements EventListener<Object> {
 	protected final Peer peer;
 	protected final Client client;
 	protected KeyAgreement keyAgreement;
-	protected byte[] secret;
+	protected SecretKey secretKey;
 
 	protected static KeyPairGenerator GetKeyPairGenerator()
 	{
@@ -61,7 +64,9 @@ public class SecureConnection implements EventListener<Object> {
 
 	@Override
 	public void eventHandler(Object obj) {
-		if (secret == null && obj instanceof PublicKey) {
+		if (obj instanceof PublicKey) {
+			if (secretKey != null)
+				return;
 			try {
 				PublicKey otherPublicKey = (PublicKey)obj;
 				if (keyAgreement == null) {
@@ -73,9 +78,13 @@ public class SecureConnection implements EventListener<Object> {
 					keyAgreement.init(kp.getPrivate());
 				}
 				keyAgreement.doPhase(otherPublicKey, true);
-				secret = keyAgreement.generateSecret();
-								
-			    peer.log("Exchanged a "+secret.length+"b key");
+				byte[] secret = keyAgreement.generateSecret();
+
+				SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
+				DESKeySpec desSpec = new DESKeySpec(secret);
+				secretKey = skf.generateSecret(desSpec);
+
+				peer.log("Exchanged a "+desSpec.getKey().length+"B key");
 			}
 			catch (Exception e) {
 				System.err.println("Unable to initialize security, connection aborted");
@@ -84,13 +93,31 @@ public class SecureConnection implements EventListener<Object> {
 			}
 		}
 
-		if (obj instanceof String)
+		else if (obj instanceof String)
 			System.out.println("Received plaintext: "+obj);
+
+		else if (obj instanceof byte[]) {
+			try {
+				Cipher c = Cipher.getInstance("DES/ECB/PKCS5Padding");
+				c.init(Cipher.DECRYPT_MODE, secretKey);
+
+				byte plaintext[] = c.doFinal((byte[])obj);
+				String message = new String(plaintext);
+				System.out.println("Received encrypted: " + message + " (was: "+new String((byte[])obj)+")");
+			}
+			catch (Exception e) { e.printStackTrace(); }
+		}
 	}
 
 	public void send(String s) {
-		try { client.send(s); }
-		catch (IOException e) { }
+		try {
+			Cipher c = Cipher.getInstance("DES/ECB/PKCS5Padding");
+			c.init(Cipher.ENCRYPT_MODE, secretKey);
+			byte[] ciphertext = c.doFinal(s.getBytes());
+
+			client.send(ciphertext);
+		}
+		catch (Exception e) { e.printStackTrace(); }
 	}
 
 }
