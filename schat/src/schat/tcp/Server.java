@@ -1,19 +1,19 @@
-package schat.net;
+package schat.tcp;
 
 import java.net.*;
 
 import schat.events.EventSource;
 
-class TCP_Server extends Thread {
+class Server extends Thread {
 	private final int port;
 	private ServerSocket serverSocket;
 	
-	private EventSource<TCP_Client> connectionEvent = new EventSource<TCP_Client>();
-	public EventSource<TCP_Client> getConnectionEvent() {
+	private EventSource<Client> connectionEvent = new EventSource<Client>();
+	public EventSource<Client> getConnectionEvent() {
 		return connectionEvent;
 	}
 
-	public TCP_Server(int port) {
+	public Server(int port) {
 		this.port = port;
 	}
 
@@ -45,7 +45,7 @@ class TCP_Server extends Thread {
 				}
 
 				try {
-					TCP_Client c = new TCP_Client();
+					Client c = new Client();
 					c.setSocket(clientSocket);
 					connectionEvent.fire(c);
 				}

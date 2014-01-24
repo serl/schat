@@ -1,11 +1,11 @@
-package schat.net;
+package schat.tcp;
 
 import java.net.*;
 import java.io.*;
 
 import schat.events.EventSource;
 
-public class TCP_Client extends Thread {
+public class Client extends Thread {
 	private Socket socket;
 	private DataInputStream inSock;
 	private DataOutputStream outSock;
