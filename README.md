@@ -30,6 +30,7 @@ Autotest:
     Received encrypted: test one_to_two
 
 A real interactive session:
+
 Term#1:
 
     $ java schat/Main 12345
