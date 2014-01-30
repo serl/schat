@@ -30,6 +30,7 @@ Autotest:
     Received encrypted: test one_to_two
 
 A real interactive session:
+Term#1:
 
     $ java schat/Main 12345
     Server socket created: ServerSocket[addr=0.0.0.0/0.0.0.0,localport=12345]
@@ -41,6 +42,7 @@ A real interactive session:
     Received encrypted: message from client
     ...and from server
 
+Term#2:
 
     $ java schat/Main localhost:12345
     Client socket created: Socket[addr=localhost/127.0.0.1,port=12345,localport=43615]
@@ -50,5 +52,4 @@ A real interactive session:
     PEER#54321: Secure channel active
     message from client
     Received encrypted: ...and from server
-
 
